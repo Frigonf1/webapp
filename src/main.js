@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import App from './App.vue'
+import App from './components/App.vue'
 import './assets/main.css' // If you have a global CSS file
 
 // Create and mount the Vue application

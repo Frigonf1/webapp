@@ -1,3 +1,12 @@
+import WaitingQueue from './components/WaitingQueue.vue';
+
+export default {
+name: 'App',
+components: {
+SymptomChecker,
+WaitingQueue
+},
+
 <template>
   <div class="app-container">
     <header class="app-header">
@@ -20,11 +29,7 @@
 
     <main class="app-content">
       <SymptomChecker v-if="currentView === 'symptomChecker'" />
-      <div v-else-if="currentView === 'waitingQueue'" class="placeholder">
-        <h2>Patient Waiting Queue</h2>
-        <p>This section will show the hospital waiting queue and estimated wait times.</p>
-        <p>(Queue management functionality to be implemented)</p>
-      </div>
+      <WaitingQueue v-else-if="currentView === 'waitingQueue'" />
     </main>
 
     <footer class="app-footer">
@@ -35,7 +40,7 @@
 </template>
 
 <script>
-import SymptomChecker from './components/SymptomChecker.vue';
+import SymptomChecker from './SymptomChecker.vue';
 
 export default {
   name: 'App',
