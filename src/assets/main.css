@@ -17,7 +17,10 @@ a,
 
 @media (hover: hover) {
   a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
+    background-image: url('src/assets/ChrisLogo-min.svg');
+    background-size: contain; /* ou cover selon l'effet voulu */
+    background-repeat: no-repeat;
+    background-position: center;
   }
 }
 
