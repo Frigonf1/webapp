@@ -10,19 +10,19 @@ WaitingQueue
 <template>
   <div class="app-container">
     <header class="app-header">
-      <h1 class="app-title">Hospital Flow Management System</h1>
+      <h1 class="app-title">DCrowd Évaluation des symptômes</h1>
       <nav class="app-nav">
         <button
             @click="currentView = 'symptomChecker'"
             :class="['nav-button', { active: currentView === 'symptomChecker' }]"
         >
-          Symptom Assessment
+          Évaluation des symptômes
         </button>
         <button
             @click="currentView = 'waitingQueue'"
             :class="['nav-button', { active: currentView === 'waitingQueue' }]"
         >
-          Waiting Queue
+          File d'attente
         </button>
       </nav>
     </header>
@@ -33,7 +33,7 @@ WaitingQueue
     </main>
 
     <footer class="app-footer">
-      <p>&copy; 2025 Hospital Flow Management System</p>
+      <p>&copy; 2025 DCrowd</p>
       <p class="disclaimer">This application is for informational purposes only and does not replace professional medical advice.</p>
     </footer>
   </div>
