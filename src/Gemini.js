@@ -7,7 +7,12 @@
 class GeminiService {
     constructor(apiKey) {
         this.apiKey = apiKey;
-        this.apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+        this.apiUrl = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent';
+
+        // Check if API key is available
+        if (!this.apiKey || this.apiKey === 'YOUR_GEMINI_API_KEY') {
+            console.error('Gemini API key not provided or invalid');
+        }
     }
 
     /**
@@ -17,6 +22,11 @@ class GeminiService {
      */
     async assessSymptoms(symptomData) {
         try {
+            // Validate API key first
+            if (!this.apiKey || this.apiKey === 'YOUR_GEMINI_API_KEY') {
+                throw new Error('Missing or invalid Gemini API key');
+            }
+
             // Format the prompt for Gemini with appropriate medical context
             const prompt = this.formatSymptomPrompt(symptomData);
 
@@ -62,7 +72,9 @@ class GeminiService {
             });
 
             if (!response.ok) {
-                throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                const errorData = await response.json().catch(() => ({}));
+                console.error('Gemini API error response:', errorData);
+                throw new Error(`API Error: ${response.status} - ${errorData.error?.message || response.statusText}`);
             }
 
             const data = await response.json();
@@ -118,6 +130,13 @@ Remember that this is not a diagnosis but a preliminary assessment to help with 
      */
     processGeminiResponse(response) {
         try {
+            // Check if the response has the expected structure
+            if (!response.candidates || !response.candidates[0] ||
+                !response.candidates[0].content || !response.candidates[0].content.parts) {
+                console.error('Unexpected Gemini response structure:', response);
+                throw new Error('Invalid response structure from Gemini API');
+            }
+
             // Extract the text response from Gemini
             const rawText = response.candidates[0].content.parts[0].text;
 

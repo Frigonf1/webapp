@@ -2,9 +2,25 @@
   <div class="symptom-checker-container">
     <h2 class="text-2xl font-bold mb-4">Symptom Assessment</h2>
 
+    <div v-if="apiKeyMissing" class="api-key-warning">
+      <div class="p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700">
+        <h3 class="font-bold">API Key Not Configured</h3>
+        <p>The Google Gemini API key is missing or invalid. Please configure it in your environment variables.</p>
+        <code class="block mt-2 p-2 bg-gray-100">VITE_GEMINI_API_KEY=your_api_key_here</code>
+      </div>
+    </div>
+
     <div v-if="loading" class="loading-container">
       <div class="spinner"></div>
       <p>Analyzing your symptoms...</p>
+    </div>
+
+    <div v-else-if="error" class="error-container p-4 bg-red-100 border-l-4 border-red-500 text-red-700 mb-4">
+      <h3 class="font-bold">Error</h3>
+      <p>{{ error }}</p>
+      <button @click="resetForm" class="mt-4 px-4 py-2 bg-red-500 text-white rounded">
+        Try Again
+      </button>
     </div>
 
     <div v-else-if="assessmentResult" class="assessment-result">
@@ -13,7 +29,7 @@
         <p class="urgency-level">Urgency: {{ assessmentResult.urgencyLevel }}</p>
       </div>
 
-      <div class="hospital-recommendation">
+      <div class="hospital-recommendation p-4">
         <p v-if="assessmentResult.shouldGoToHospital" class="text-red-600 font-bold">
           Based on your symptoms, you should seek medical attention at a hospital.
         </p>
@@ -22,18 +38,18 @@
         </p>
       </div>
 
-      <div class="full-assessment">
-        <h4 class="text-lg font-semibold mt-4">Detailed Assessment</h4>
-        <div class="assessment-text whitespace-pre-line">
+      <div class="full-assessment p-4">
+        <h4 class="text-lg font-semibold mt-2">Detailed Assessment</h4>
+        <div class="assessment-text whitespace-pre-line p-4 bg-gray-50 rounded mt-2">
           {{ assessmentResult.fullAssessment }}
         </div>
       </div>
 
-      <div class="disclaimer mt-6 p-4 bg-gray-100 text-sm">
+      <div class="disclaimer mt-4 p-4 bg-gray-100 text-sm">
         <p><strong>Important:</strong> This is not medical advice. When in doubt, always consult a healthcare professional.</p>
       </div>
 
-      <button @click="resetForm" class="btn-primary mt-4">
+      <button @click="resetForm" class="btn-primary mt-4 mx-4 mb-4">
         Start New Assessment
       </button>
     </div>
@@ -133,7 +149,7 @@
         ></textarea>
       </div>
 
-      <button type="submit" class="btn-primary" :disabled="loading">
+      <button type="submit" class="btn-primary" :disabled="loading || apiKeyMissing">
         Assess My Symptoms
       </button>
     </form>
@@ -142,6 +158,8 @@
 
 <script>
 import GeminiService from '../Gemini.js';
+import GeminiMockService from '../GeminiMockService.js';
+import { apiConfig, featureFlags } from '../config.js';
 
 export default {
   name: 'SymptomChecker',
@@ -160,7 +178,9 @@ export default {
       },
       assessmentResult: null,
       loading: false,
-      error: null
+      error: null,
+      apiKeyMissing: false,
+      usingMockService: false
     };
   },
   computed: {
@@ -177,33 +197,55 @@ export default {
     }
   },
   created() {
-    // Initialize the Gemini service with your API key
-    // In production, you should use environment variables for the API key
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY || 'YOUR_GEMINI_API_KEY';
-    this.geminiService = new GeminiService(apiKey);
+    // Get API key from config
+    const apiKey = apiConfig.gemini.apiKey;
+
+    // Check if we need to use mock service
+    if (!apiKey || featureFlags.enableMockResponses) {
+      console.warn('Using mock Gemini service for testing');
+      this.geminiService = new GeminiMockService();
+      this.usingMockService = true;
+
+      if (!apiKey) {
+        this.apiKeyMissing = true;
+      }
+    } else {
+      // Use real service with API key
+      this.geminiService = new GeminiService(apiKey);
+    }
   },
   methods: {
     async submitSymptoms() {
-      this.loading = true;
+      // Reset previous errors and results
       this.error = null;
+      this.loading = true;
 
       try {
-        this.assessmentResult = await this.geminiService.assessSymptoms(this.symptomData);
-      } catch (error) {
-        this.error = error.message || 'An error occurred during assessment';
-        console.error('Assessment error:', error);
+        // If mock service is not enabled but API key is missing, show error
+        if (this.apiKeyMissing && !this.usingMockService) {
+          throw new Error('Gemini API key is not configured. Please add it to your environment variables.');
+        }
 
-        // Provide fallback result on error
-        this.assessmentResult = {
-          urgencyLevel: 'ERROR',
-          shouldGoToHospital: true,
-          fullAssessment: 'There was an error processing your symptoms. To be safe, please consult with a healthcare professional.'
-        };
+        console.log('Submitting symptoms for assessment:', this.symptomData);
+        this.assessmentResult = await this.geminiService.assessSymptoms(this.symptomData);
+        console.log('Assessment result:', this.assessmentResult);
+
+        // Additional validation of the result
+        if (!this.assessmentResult || this.assessmentResult.urgencyLevel === 'ERROR') {
+          throw new Error('Failed to get a valid assessment result');
+        }
+      } catch (error) {
+        console.error('Error during symptom assessment:', error);
+        this.error = error.message || 'An unexpected error occurred during symptom assessment';
+
+        // Clear the result if there was an error
+        this.assessmentResult = null;
       } finally {
         this.loading = false;
       }
     },
     resetForm() {
+      // Reset the form data
       this.symptomData = {
         age: '',
         gender: '',
@@ -214,6 +256,8 @@ export default {
         medications: '',
         additionalInfo: ''
       };
+
+      // Clear results and errors
       this.assessmentResult = null;
       this.error = null;
     }
@@ -316,16 +360,11 @@ export default {
   align-items: center;
 }
 
-.hospital-recommendation,
-.full-assessment,
-.disclaimer {
-  padding: 1rem;
+.api-key-warning {
+  margin-bottom: 1rem;
 }
 
-.assessment-text {
-  background-color: #f9fafb;
-  padding: 1rem;
-  border-radius: 0.25rem;
-  margin-top: 0.5rem;
+.error-container {
+  margin-bottom: 1rem;
 }
 </style>
