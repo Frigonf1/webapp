@@ -150,7 +150,7 @@
       </div>
 
       <button type="submit" class="btn-primary" :disabled="loading || apiKeyMissing">
-        Évaluer ma conditiopn
+        Évaluer ma condition
       </button>
     </form>
   </div>

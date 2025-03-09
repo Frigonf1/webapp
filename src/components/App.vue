@@ -1,12 +1,3 @@
-import WaitingQueue from './components/WaitingQueue.vue';
-
-export default {
-name: 'App',
-components: {
-SymptomChecker,
-WaitingQueue
-},
-
 <template>
   <div class="app-container">
     <header class="app-header">
@@ -41,11 +32,13 @@ WaitingQueue
 
 <script>
 import SymptomChecker from './SymptomChecker.vue';
+import WaitingQueue from './WaitingQueue.vue';
 
 export default {
   name: 'App',
   components: {
-    SymptomChecker
+    SymptomChecker,
+    WaitingQueue
   },
   data() {
     return {
@@ -152,4 +145,3 @@ body {
   opacity: 0.8;
 }
 </style>
-
