@@ -1,6 +1,6 @@
 <template>
   <div class="symptom-checker-container">
-    <h2 class="text-2xl font-bold mb-4">Symptom Assessment</h2>
+    <h2 class="text-2xl font-bold mb-4">Évaluation des symptômes</h2>
 
     <div v-if="apiKeyMissing" class="api-key-warning">
       <div class="p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700">
@@ -12,7 +12,7 @@
 
     <div v-if="loading" class="loading-container">
       <div class="spinner"></div>
-      <p>Analyzing your symptoms...</p>
+      <p>Analyse...</p>
     </div>
 
     <div v-else-if="error" class="error-container p-4 bg-red-100 border-l-4 border-red-500 text-red-700 mb-4">
@@ -67,18 +67,18 @@
       </div>
 
       <div class="form-group">
-        <label for="gender">Gender</label>
+        <label for="gender">Sexe</label>
         <select id="gender" v-model="symptomData.gender" class="form-control" required>
-          <option value="">Select gender</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-          <option value="Other">Other</option>
-          <option value="Prefer not to say">Prefer not to say</option>
+          <option value="">Sélectionner le sexe</option>
+          <option value="Male">Homme</option>
+          <option value="Female">Femme</option>
+          <option value="Other">Autre</option>
+          <option value="Prefer not to say">Je préfère ne pas le dire</option>
         </select>
       </div>
 
       <div class="form-group">
-        <label for="primarySymptoms">Primary Symptoms</label>
+        <label for="primarySymptoms">Symptômes principaux</label>
         <textarea
             id="primarySymptoms"
             v-model="symptomData.primarySymptoms"
@@ -90,7 +90,7 @@
       </div>
 
       <div class="form-group">
-        <label for="duration">How long have you had these symptoms?</label>
+        <label for="duration">Depuis combien de temps avez vous ces symptômes?</label>
         <input
             type="text"
             id="duration"
@@ -102,7 +102,7 @@
       </div>
 
       <div class="form-group">
-        <label for="painLevel">Pain Level (1-10)</label>
+        <label for="painLevel">Échelle de douleur (1-10)</label>
         <div class="pain-slider">
           <input
               type="range"
@@ -117,7 +117,7 @@
       </div>
 
       <div class="form-group">
-        <label for="medicalConditions">Existing Medical Conditions</label>
+        <label for="medicalConditions">Conditions de santé existantes</label>
         <textarea
             id="medicalConditions"
             v-model="symptomData.medicalConditions"
@@ -128,7 +128,7 @@
       </div>
 
       <div class="form-group">
-        <label for="medications">Current Medications</label>
+        <label for="medications">Prise de médicaments</label>
         <textarea
             id="medications"
             v-model="symptomData.medications"
@@ -139,7 +139,7 @@
       </div>
 
       <div class="form-group">
-        <label for="additionalInfo">Additional Information</label>
+        <label for="additionalInfo">Informations additionnelles</label>
         <textarea
             id="additionalInfo"
             v-model="symptomData.additionalInfo"
@@ -150,7 +150,7 @@
       </div>
 
       <button type="submit" class="btn-primary" :disabled="loading || apiKeyMissing">
-        Assess My Symptoms
+        Évaluer ma conditiopn
       </button>
     </form>
   </div>
